@@ -572,6 +572,17 @@ export class Cline extends EventEmitter<ClineEvents> {
 		this.apiConversationHistory = []
 		await this.providerRef.deref()?.postStateToWebview()
 
+		// タスクに区切り文字 "====--------====" が含まれる場合は、それで分割して複数のタスクとして処理する
+		if (task && task.includes("====--------====")) {
+			const tasks = task
+				.split("====--------====")
+				.map((t) => t.trim())
+				.filter((t) => t.length > 0)
+			await this.startTasks(tasks, images)
+			return
+		}
+
+		// 単一のタスクとして処理（区切り文字がない場合、または分割後にタスクがない場合）
 		await this.say("text", task, images)
 		this.isInitialized = true
 
@@ -586,6 +597,12 @@ export class Cline extends EventEmitter<ClineEvents> {
 			},
 			...imageBlocks,
 		])
+	}
+
+	private async startTasks(tasks: string[], images?: string[]): Promise<void> {
+		for (const task of tasks) {
+			await this.startTask(task, images)
+		}
 	}
 
 	async resumePausedTask(lastMessage: string) {
