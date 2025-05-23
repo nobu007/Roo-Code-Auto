@@ -854,4 +854,27 @@ describe("Cline", () => {
 			})
 		})
 	})
+
+	describe("startTask", () => {
+		it("should handle multiple tasks sequentially", async () => {
+			const [cline, task] = Task.create({
+				provider: mockProvider,
+				apiConfiguration: mockApiConfig,
+				task: "task 1\n====--------====\ntask 2",
+			})
+
+			// Mock say to track messages
+			const saySpy = jest.spyOn(cline, "say")
+
+			// Mock initiateTaskLoop to resolve immediately
+			jest.spyOn(cline as any, "initiateTaskLoop").mockResolvedValue(undefined)
+
+			await task
+
+			// Verify that say was called for each task
+			expect(saySpy).toHaveBeenCalledTimes(2)
+			expect(saySpy).toHaveBeenCalledWith("text", "task 1", undefined)
+			expect(saySpy).toHaveBeenCalledWith("text", "task 2", undefined)
+		})
+	})
 })

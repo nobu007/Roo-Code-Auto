@@ -665,6 +665,16 @@ export class Task extends EventEmitter<ClineEvents> {
 		this.apiConversationHistory = []
 		await this.providerRef.deref()?.postStateToWebview()
 
+		// タスクに区切り文字 "====--------====" が含まれる場合は、それで分割して複数のタスクとして処理する
+		if (task && task.includes("====--------====")) {
+			const tasks = task
+				.split("====--------====")
+				.map((t) => t.trim())
+				.filter((t) => t.length > 0)
+			await this.startTasks(tasks, images)
+			return
+		}
+
 		await this.say("text", task, images)
 		this.isInitialized = true
 
@@ -702,6 +712,12 @@ export class Task extends EventEmitter<ClineEvents> {
 				?.log(`Error failed to add reply from subtask into conversation of parent task, error: ${error}`)
 
 			throw error
+		}
+	}
+
+	private async startTasks(tasks: string[], images?: string[]): Promise<void> {
+		for (const task of tasks) {
+			await this.startTask(task, images)
 		}
 	}
 
