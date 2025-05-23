@@ -8,22 +8,29 @@ import {
 	ModelInfo,
 	openAiModelInfoSaneDefaults,
 } from "../../shared/api"
-import { SingleCompletionHandler } from "../index"
+
+import { XmlMatcher } from "../../utils/xml-matcher"
+
 import { convertToOpenAiMessages } from "../transform/openai-format"
 import { convertToR1Format } from "../transform/r1-format"
 import { convertToSimpleMessages } from "../transform/simple-format"
 import { ApiStream, ApiStreamUsageChunk } from "../transform/stream"
+import { getModelParams } from "../transform/model-params"
+
+import { DEFAULT_HEADERS, DEEP_SEEK_DEFAULT_TEMPERATURE } from "./constants"
+import type { SingleCompletionHandler } from "../index"
 import { BaseProvider } from "./base-provider"
-import { XmlMatcher } from "../../utils/xml-matcher"
-import { DEEP_SEEK_DEFAULT_TEMPERATURE, DEFAULT_HEADERS, AZURE_AI_INFERENCE_PATH } from "./constants"
 
-export interface OpenAiHandlerOptions extends ApiHandlerOptions {}
+export const AZURE_AI_INFERENCE_PATH = "/models/chat/completions"
 
+// TODO: Rename this to OpenAICompatibleHandler. Also, I think the
+// `OpenAINativeHandler` can subclass from this, since it's obviously
+// compatible with the OpenAI API. We can also rename it to `OpenAIHandler`.
 export class OpenAiHandler extends BaseProvider implements SingleCompletionHandler {
-	protected options: OpenAiHandlerOptions
+	protected options: ApiHandlerOptions
 	private client: OpenAI
 
-	constructor(options: OpenAiHandlerOptions) {
+	constructor(options: ApiHandlerOptions) {
 		super()
 		this.options = options
 
@@ -33,12 +40,17 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 		const urlHost = this._getUrlHost(this.options.openAiBaseUrl)
 		const isAzureOpenAi = urlHost === "azure.com" || urlHost.endsWith(".azure.com") || options.openAiUseAzure
 
+		const headers = {
+			...DEFAULT_HEADERS,
+			...(this.options.openAiHeaders || {}),
+		}
+
 		if (isAzureAiInference) {
 			// Azure AI Inference Service (e.g., for DeepSeek) uses a different path structure
 			this.client = new OpenAI({
 				baseURL,
 				apiKey,
-				defaultHeaders: DEFAULT_HEADERS,
+				defaultHeaders: headers,
 				defaultQuery: { "api-version": this.options.azureApiVersion || "2024-05-01-preview" },
 			})
 		} else if (isAzureOpenAi) {
@@ -48,31 +60,24 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 				baseURL,
 				apiKey,
 				apiVersion: this.options.azureApiVersion || azureOpenAiDefaultApiVersion,
-				defaultHeaders: {
-					...DEFAULT_HEADERS,
-					...(this.options.openAiHostHeader ? { Host: this.options.openAiHostHeader } : {}),
-				},
+				defaultHeaders: headers,
 			})
 		} else {
 			this.client = new OpenAI({
 				baseURL,
 				apiKey,
-				defaultHeaders: {
-					...DEFAULT_HEADERS,
-					...(this.options.openAiHostHeader ? { Host: this.options.openAiHostHeader } : {}),
-				},
+				defaultHeaders: headers,
 			})
 		}
 	}
 
 	override async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
-		const modelInfo = this.getModel().info
+		const { info: modelInfo, reasoning } = this.getModel()
 		const modelUrl = this.options.openAiBaseUrl ?? ""
 		const modelId = this.options.openAiModelId ?? ""
 		const enabledR1Format = this.options.openAiR1FormatEnabled ?? false
 		const enabledLegacyFormat = this.options.openAiLegacyFormat ?? false
 		const isAzureAiInference = this._isAzureAiInference(modelUrl)
-		const urlHost = this._getUrlHost(modelUrl)
 		const deepseekReasoner = modelId.includes("deepseek-reasoner") || enabledR1Format
 		const ark = modelUrl.includes(".volces.com")
 
@@ -145,7 +150,7 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 				messages: convertedMessages,
 				stream: true as const,
 				...(isGrokXAI ? {} : { stream_options: { include_usage: true } }),
-				reasoning_effort: this.getModel().info.reasoningEffort,
+				...(reasoning && reasoning),
 			}
 
 			if (this.options.includeMaxTokens) {
@@ -225,7 +230,7 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 		}
 	}
 
-	protected processUsageMetrics(usage: any, modelInfo?: ModelInfo): ApiStreamUsageChunk {
+	protected processUsageMetrics(usage: any, _modelInfo?: ModelInfo): ApiStreamUsageChunk {
 		return {
 			type: "usage",
 			inputTokens: usage?.prompt_tokens || 0,
@@ -235,11 +240,11 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 		}
 	}
 
-	override getModel(): { id: string; info: ModelInfo } {
-		return {
-			id: this.options.openAiModelId ?? "",
-			info: this.options.openAiCustomModelInfo ?? openAiModelInfoSaneDefaults,
-		}
+	override getModel() {
+		const id = this.options.openAiModelId ?? ""
+		const info = this.options.openAiCustomModelInfo ?? openAiModelInfoSaneDefaults
+		const params = getModelParams({ format: "openai", modelId: id, model: info, settings: this.options })
+		return { id, info, ...params }
 	}
 
 	async completePrompt(prompt: string): Promise<string> {
@@ -360,7 +365,7 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 	}
 }
 
-export async function getOpenAiModels(baseUrl?: string, apiKey?: string, hostHeader?: string) {
+export async function getOpenAiModels(baseUrl?: string, apiKey?: string, openAiHeaders?: Record<string, string>) {
 	try {
 		if (!baseUrl) {
 			return []
@@ -371,14 +376,13 @@ export async function getOpenAiModels(baseUrl?: string, apiKey?: string, hostHea
 		}
 
 		const config: Record<string, any> = {}
-		const headers: Record<string, string> = {}
+		const headers: Record<string, string> = {
+			...DEFAULT_HEADERS,
+			...(openAiHeaders || {}),
+		}
 
 		if (apiKey) {
 			headers["Authorization"] = `Bearer ${apiKey}`
-		}
-
-		if (hostHeader) {
-			headers["Host"] = hostHeader
 		}
 
 		if (Object.keys(headers).length > 0) {

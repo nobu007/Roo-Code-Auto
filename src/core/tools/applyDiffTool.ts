@@ -3,10 +3,9 @@ import fs from "fs/promises"
 
 import { ClineSayTool } from "../../shared/ExtensionMessage"
 import { getReadablePath } from "../../utils/path"
-import { Cline } from "../Cline"
-import { ToolUse, RemoveClosingTag } from "../../shared/tools"
+import { Task } from "../task/Task"
+import { ToolUse, RemoveClosingTag, AskApproval, HandleError, PushToolResult } from "../../shared/tools"
 import { formatResponse } from "../prompts/responses"
-import { AskApproval, HandleError, PushToolResult } from "../../shared/tools"
 import { fileExistsAtPath } from "../../utils/fs"
 import { addLineNumbers } from "../../integrations/misc/extract-text"
 import { RecordSource } from "../context-tracking/FileContextTrackerTypes"
@@ -14,7 +13,7 @@ import { telemetryService } from "../../services/telemetry/TelemetryService"
 import { unescapeHtmlEntities } from "../../utils/text-normalization"
 
 export async function applyDiffTool(
-	cline: Cline,
+	cline: Task,
 	block: ToolUse,
 	askApproval: AskApproval,
 	handleError: HandleError,
@@ -31,6 +30,7 @@ export async function applyDiffTool(
 	const sharedMessageProps: ClineSayTool = {
 		tool: "appliedDiff",
 		path: getReadablePath(cline.cwd, removeClosingTag("path", relPath)),
+		diff: diffContent,
 	}
 
 	try {
@@ -42,8 +42,14 @@ export async function applyDiffTool(
 				toolProgressStatus = cline.diffStrategy.getProgressStatus(block)
 			}
 
-			const partialMessage = JSON.stringify(sharedMessageProps)
-			await cline.ask("tool", partialMessage, block.partial, toolProgressStatus).catch(() => {})
+			if (toolProgressStatus && Object.keys(toolProgressStatus).length === 0) {
+				return
+			}
+
+			await cline
+				.ask("tool", JSON.stringify(sharedMessageProps), block.partial, toolProgressStatus)
+				.catch(() => {})
+
 			return
 		} else {
 			if (!relPath) {
@@ -92,11 +98,8 @@ export async function applyDiffTool(
 				error: "No diff strategy available",
 			}
 
-			let partResults = ""
-
 			if (!diffResult.success) {
 				cline.consecutiveMistakeCount++
-				cline.recordToolError("apply_diff")
 				const currentCount = (cline.consecutiveMistakeCountForApplyDiff.get(relPath) || 0) + 1
 				cline.consecutiveMistakeCountForApplyDiff.set(relPath, currentCount)
 				let formattedError = ""
@@ -113,8 +116,6 @@ export async function applyDiffTool(
 						formattedError = `<error_details>\n${
 							failPart.error
 						}${errorDetails ? `\n\nDetails:\n${errorDetails}` : ""}\n</error_details>`
-
-						partResults += formattedError
 					}
 				} else {
 					const errorDetails = diffResult.details ? JSON.stringify(diffResult.details, null, 2) : ""
@@ -127,6 +128,8 @@ export async function applyDiffTool(
 				if (currentCount >= 2) {
 					await cline.say("diff_error", formattedError)
 				}
+
+				cline.recordToolError("apply_diff", formattedError)
 
 				pushToolResult(formattedError)
 				return
@@ -163,7 +166,7 @@ export async function applyDiffTool(
 
 			// Track file edit operation
 			if (relPath) {
-				await cline.getFileContextTracker().trackFileContext(relPath, "roo_edited" as RecordSource)
+				await cline.fileContextTracker.trackFileContext(relPath, "roo_edited" as RecordSource)
 			}
 
 			// Used to determine if we should wait for busy terminal to update before sending api request
@@ -193,7 +196,7 @@ export async function applyDiffTool(
 						)}\n</final_file_content>\n\n` +
 						`Please note:\n` +
 						`1. You do not need to re-write the file with these changes, as they have already been applied.\n` +
-						`2. Proceed with the task using cline updated file content as the new baseline.\n` +
+						`2. Proceed with the task using this updated file content as the new baseline.\n` +
 						`3. If the user's edits have addressed part of the task or changed the requirements, adjust your approach accordingly.` +
 						`${newProblemsMessage}`,
 				)

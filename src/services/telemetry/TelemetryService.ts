@@ -120,6 +120,24 @@ class TelemetryService {
 		this.captureEvent(PostHogClient.EVENTS.TASK.CHECKPOINT_RESTORED, { taskId })
 	}
 
+	public captureContextCondensed(
+		taskId: string,
+		isAutomaticTrigger: boolean,
+		usedCustomPrompt?: boolean,
+		usedCustomApiHandler?: boolean,
+	): void {
+		this.captureEvent(PostHogClient.EVENTS.TASK.CONTEXT_CONDENSED, {
+			taskId,
+			isAutomaticTrigger,
+			...(usedCustomPrompt !== undefined && { usedCustomPrompt }),
+			...(usedCustomApiHandler !== undefined && { usedCustomApiHandler }),
+		})
+	}
+
+	public captureSlidingWindowTruncation(taskId: string): void {
+		this.captureEvent(PostHogClient.EVENTS.TASK.SLIDING_WINDOW_TRUNCATION, { taskId })
+	}
+
 	public captureCodeActionUsed(actionType: string): void {
 		this.captureEvent(PostHogClient.EVENTS.TASK.CODE_ACTION_USED, { actionType })
 	}
@@ -143,6 +161,14 @@ class TelemetryService {
 
 	public captureConsecutiveMistakeError(taskId: string): void {
 		this.captureEvent(PostHogClient.EVENTS.ERRORS.CONSECUTIVE_MISTAKE_ERROR, { taskId })
+	}
+
+	/**
+	 * Captures a title button click event
+	 * @param button The button that was clicked
+	 */
+	public captureTitleButtonClicked(button: string): void {
+		this.captureEvent("Title Button Clicked", { button })
 	}
 
 	/**
