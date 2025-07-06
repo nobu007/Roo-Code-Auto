@@ -59,8 +59,10 @@ services:
             - "${EVALS_WEB_PORT:-3446}:3000"
         environment:
             - HOST_EXECUTION_METHOD=docker
+            - ROO_CODE_IPC_SOCKET_PATH=/tmp/roo-code.sock
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
+            - /tmp:/tmp
         depends_on:
             db:
                 condition: service_healthy

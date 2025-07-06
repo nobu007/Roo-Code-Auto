@@ -32,7 +32,7 @@ check_docker_services() {
     echo "❌ Docker Compose is not available. Please ensure Docker Desktop is properly installed."
     exit 1
   fi
-  
+
   local services_to_start=()
 
   if ! nc -z localhost 5432 2>/dev/null; then
@@ -104,12 +104,12 @@ check_docker_services() {
   fi
 }
 
-if [[ "$(uname -s)" != "Darwin" ]]; then
-  echo "⚠️ Only macOS is currently supported."
-  echo "The Roo Code evals system can also be run with Docker on any platform."
-  echo "See https://github.com/RooCodeInc/Roo-Code/blob/main/packages/evals/README.md for instructions."
-  exit 1
-fi
+# if [[ "$(uname -s)" != "Darwin" ]]; then
+#   echo "⚠️ Only macOS is currently supported."
+#   echo "The Roo Code evals system can also be run with Docker on any platform."
+#   echo "See https://github.com/RooCodeInc/Roo-Code/blob/main/packages/evals/README.md for instructions."
+#   exit 1
+# fi
 
 if ! command -v brew &>/dev/null; then
   if [[ -f "/opt/homebrew/bin/brew" ]]; then
