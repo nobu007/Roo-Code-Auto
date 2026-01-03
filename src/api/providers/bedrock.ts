@@ -4,6 +4,8 @@ import {
 	ConverseCommand,
 	BedrockRuntimeClientConfig,
 	ContentBlock,
+	Message,
+	SystemContentBlock,
 } from "@aws-sdk/client-bedrock-runtime"
 import { fromIni } from "@aws-sdk/credential-providers"
 import { Anthropic } from "@anthropic-ai/sdk"
@@ -19,7 +21,6 @@ import { ProviderSettings } from "../../schemas"
 import { ApiStream } from "../transform/stream"
 import { BaseProvider } from "./base-provider"
 import { logger } from "../../utils/logging"
-import { Message, SystemContentBlock } from "@aws-sdk/client-bedrock-runtime"
 // New cache-related imports
 import { MultiPointStrategy } from "../transform/cache-strategy/multi-point-strategy"
 import { ModelInfo as CacheModelInfo } from "../transform/cache-strategy/types"
@@ -160,7 +161,10 @@ export class AwsBedrockHandler extends BaseProvider implements SingleCompletionH
 			if (this.arnInfo.awsUseCrossRegionInference) this.options.awsUseCrossRegionInference = true
 		}
 
-		this.options.modelTemperature ?? BEDROCK_DEFAULT_TEMPERATURE
+		if (!this.options.modelTemperature) {
+			this.options.modelTemperature = BEDROCK_DEFAULT_TEMPERATURE
+		}
+
 		this.costModelConfig = this.getModel()
 
 		const clientConfig: BedrockRuntimeClientConfig = {
@@ -315,6 +319,7 @@ export class AwsBedrockHandler extends BaseProvider implements SingleCompletionH
 							error: error instanceof Error ? error : String(error),
 						})
 					} finally {
+						// eslint-disable-next-line no-unsafe-finally
 						continue
 					}
 				}
@@ -532,7 +537,7 @@ export class AwsBedrockHandler extends BaseProvider implements SingleCompletionH
 		 * match[4] - The resource ID (e.g., "anthropic.claude-3-sonnet-20240229-v1:0")
 		 */
 
-		const arnRegex = /^arn:aws:bedrock:([^:]+):([^:]*):(?:([^\/]+)\/([\w\.\-:]+)|([^\/]+))$/
+		const arnRegex = /^arn:aws:(?:bedrock|sagemaker):([^:]+):([^:]*):(?:([^\/]+)\/([\w\.\-:]+)|([^\/]+))$/
 		let match = arn.match(arnRegex)
 
 		if (match && match[1] && match[3] && match[4]) {
@@ -603,8 +608,8 @@ export class AwsBedrockHandler extends BaseProvider implements SingleCompletionH
 			// Look for a pattern where the first segment before a dot doesn't contain dots or colons
 			// and the remaining parts still contain at least one dot
 			const genericPrefixMatch = modelId.match(/^([^.:]+)\.(.+\..+)$/)
+
 			if (genericPrefixMatch) {
-				const genericPrefix = genericPrefixMatch[1] + "."
 				return genericPrefixMatch[2]
 			}
 		}
@@ -708,10 +713,11 @@ export class AwsBedrockHandler extends BaseProvider implements SingleCompletionH
 		if (Array.isArray(content)) {
 			return content.map((block) => {
 				// Use destructuring to remove cachePoint property
-				const { cachePoint, ...rest } = block
+				const { cachePoint: _, ...rest } = block
 				return rest
 			})
 		}
+
 		return content
 	}
 
@@ -864,7 +870,7 @@ Suggestions:
 	/**
 	 * Formats an error message based on the error type and context
 	 */
-	private formatErrorMessage(error: unknown, errorType: string, isStreamContext: boolean): string {
+	private formatErrorMessage(error: unknown, errorType: string, _isStreamContext: boolean): string {
 		const definition = AwsBedrockHandler.ERROR_TYPES[errorType] || AwsBedrockHandler.ERROR_TYPES.GENERIC
 		let template = definition.messageTemplate
 

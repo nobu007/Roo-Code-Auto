@@ -10,14 +10,18 @@
 		"forceConsistentCasingInFileNames": true,
 		"noFallthroughCasesInSwitch": true,
 		"module": "esnext",
-		"moduleResolution": "node",
+		"sourceMap": true,
+		"inlineSources": false,
+		"moduleResolution": "bundler",
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"noEmit": true,
 		"jsx": "react-jsx",
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"@src/*": ["./src/*"],
+			"@roo/*": ["../src/*"]
 		}
 	},
 	"include": ["src", "../src/shared"]

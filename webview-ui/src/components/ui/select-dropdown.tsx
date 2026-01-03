@@ -193,7 +193,7 @@ export const SelectDropdown = React.memo(
 						className={cn(
 							"w-full min-w-0 max-w-full inline-flex items-center gap-1.5 relative whitespace-nowrap px-1.5 py-1 text-xs",
 							"bg-transparent border border-[rgba(255,255,255,0.08)] rounded-md text-vscode-foreground w-auto",
-							"transition-all duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-vscode-focusBorder",
+							"transition-all duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-vscode-focusBorder focus-visible:ring-inset",
 							disabled
 								? "opacity-50 cursor-not-allowed"
 								: "opacity-90 hover:opacity-100 hover:bg-[rgba(255,255,255,0.03)] hover:border-[rgba(255,255,255,0.15)] cursor-pointer",
@@ -210,7 +210,8 @@ export const SelectDropdown = React.memo(
 						<div className="flex flex-col w-full">
 							{/* Search input */}
 							<div className="relative p-2 border-b border-vscode-dropdown-border">
-								<input aria-label="Search"
+								<input
+									aria-label="Search"
 									ref={searchInputRef}
 									value={searchValue}
 									onChange={(e) => setSearchValue(e.target.value)}

@@ -4,12 +4,9 @@ export const rooCodeDefaults: RooCodeSettings = {
 	apiProvider: "openrouter",
 	openRouterUseMiddleOutTransform: false,
 
-	// modelTemperature: null,
-	// reasoningEffort: "high",
-	rateLimitSeconds: 0,
+	lastShownAnnouncementId: "may-21-2025-3-18",
 
 	pinnedApiConfigs: {},
-	lastShownAnnouncementId: "apr-16-2025-3-12",
 
 	autoApprovalEnabled: true,
 	alwaysAllowReadOnly: true,
@@ -31,42 +28,39 @@ export const rooCodeDefaults: RooCodeSettings = {
 	screenshotQuality: 75,
 	remoteBrowserEnabled: false,
 
-	enableCheckpoints: false,
-	checkpointStorage: "task",
-
 	ttsEnabled: false,
 	ttsSpeed: 1,
 	soundEnabled: false,
 	soundVolume: 0.5,
 
-	maxOpenTabsContext: 20,
-	maxWorkspaceFiles: 200,
-	showRooIgnoredFiles: true,
-	maxReadFileLine: 500,
-
 	terminalOutputLineLimit: 500,
 	terminalShellIntegrationTimeout: 30000,
 	terminalCommandDelay: 0,
 	terminalPowershellCounter: false,
-	terminalZshClearEolMark: true,
 	terminalZshOhMy: true,
+	terminalZshClearEolMark: true,
 	terminalZshP10k: false,
 	terminalZdotdir: true,
+	terminalCompressProgressBar: true,
+	terminalShellIntegrationDisabled: false,
 
 	diffEnabled: true,
-	fuzzyMatchThreshold: 1.0,
-	experiments: {
-		search_and_replace: false,
-		insert_content: false,
-		powerSteering: false,
-		append_to_file: false,
-	},
+	fuzzyMatchThreshold: 1,
+
+	enableCheckpoints: false,
+
+	rateLimitSeconds: 0,
+	maxOpenTabsContext: 20,
+	maxWorkspaceFiles: 200,
+	showRooIgnoredFiles: true,
+	maxReadFileLine: 500, // -1 to enable full file reading.
 
 	language: "en",
-
 	telemetrySetting: "enabled",
 
 	mcpEnabled: false,
+
 	mode: "code",
+
 	customModes: [],
 }

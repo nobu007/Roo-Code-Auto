@@ -2,8 +2,11 @@
 
 import React from "react"
 import { render, screen } from "@testing-library/react"
-import TaskHeader from "../TaskHeader"
-import { ApiConfiguration } from "../../../../../src/shared/api"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+
+import { ProviderSettings } from "@roo/shared/api"
+
+import TaskHeader, { TaskHeaderProps } from "../TaskHeader"
 
 // Mock the vscode API
 jest.mock("@/utils/vscode", () => ({
@@ -18,104 +21,62 @@ jest.mock("@vscode/webview-ui-toolkit/react", () => ({
 }))
 
 // Mock the ExtensionStateContext
-jest.mock("../../../context/ExtensionStateContext", () => ({
+jest.mock("@src/context/ExtensionStateContext", () => ({
 	useExtensionState: () => ({
 		apiConfiguration: {
 			apiProvider: "anthropic",
 			apiKey: "test-api-key", // Add relevant fields
 			apiModelId: "claude-3-opus-20240229", // Add relevant fields
-		} as ApiConfiguration, // Optional: Add type assertion if ApiConfiguration is imported
+		} as ProviderSettings, // Optional: Add type assertion if ProviderSettings is imported
 		currentTaskItem: null,
 	}),
 }))
 
 describe("TaskHeader", () => {
-	const defaultProps = {
-		task: { text: "Test task", images: [] },
+	const defaultProps: TaskHeaderProps = {
+		task: { type: "say", ts: Date.now(), text: "Test task", images: [] },
 		tokensIn: 100,
 		tokensOut: 50,
 		doesModelSupportPromptCache: true,
 		totalCost: 0.05,
 		contextTokens: 200,
+		buttonsDisabled: false,
+		handleCondenseContext: jest.fn(),
 		onClose: jest.fn(),
 	}
 
-	it("should display cost when totalCost is greater than 0", () => {
-		render(
-			<TaskHeader
-				{...defaultProps}
-				task={{
-					type: "say",
-					ts: Date.now(),
-					text: "Test task",
-					images: [],
-				}}
-			/>,
+	const queryClient = new QueryClient()
+
+	const renderTaskHeader = (props: Partial<TaskHeaderProps> = {}) => {
+		return render(
+			<QueryClientProvider client={queryClient}>
+				<TaskHeader {...defaultProps} {...props} />
+			</QueryClientProvider>,
 		)
+	}
+
+	it("should display cost when totalCost is greater than 0", () => {
+		renderTaskHeader()
 		expect(screen.getByText("$0.05")).toBeInTheDocument()
 	})
 
 	it("should not display cost when totalCost is 0", () => {
-		render(
-			<TaskHeader
-				{...defaultProps}
-				totalCost={0}
-				task={{
-					type: "say",
-					ts: Date.now(),
-					text: "Test task",
-					images: [],
-				}}
-			/>,
-		)
+		renderTaskHeader({ totalCost: 0 })
 		expect(screen.queryByText("$0.0000")).not.toBeInTheDocument()
 	})
 
 	it("should not display cost when totalCost is null", () => {
-		render(
-			<TaskHeader
-				{...defaultProps}
-				totalCost={null as any}
-				task={{
-					type: "say",
-					ts: Date.now(),
-					text: "Test task",
-					images: [],
-				}}
-			/>,
-		)
+		renderTaskHeader({ totalCost: null as any })
 		expect(screen.queryByText(/\$/)).not.toBeInTheDocument()
 	})
 
 	it("should not display cost when totalCost is undefined", () => {
-		render(
-			<TaskHeader
-				{...defaultProps}
-				totalCost={undefined as any}
-				task={{
-					type: "say",
-					ts: Date.now(),
-					text: "Test task",
-					images: [],
-				}}
-			/>,
-		)
+		renderTaskHeader({ totalCost: undefined as any })
 		expect(screen.queryByText(/\$/)).not.toBeInTheDocument()
 	})
 
 	it("should not display cost when totalCost is NaN", () => {
-		render(
-			<TaskHeader
-				{...defaultProps}
-				totalCost={NaN}
-				task={{
-					type: "say",
-					ts: Date.now(),
-					text: "Test task",
-					images: [],
-				}}
-			/>,
-		)
+		renderTaskHeader({ totalCost: NaN })
 		expect(screen.queryByText(/\$/)).not.toBeInTheDocument()
 	})
 })
