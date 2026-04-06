@@ -20,7 +20,8 @@
 		"build": "tsup",
 		"npm:publish:test": "tsup --outDir npm/dist && cd npm && npm publish --dry-run",
 		"npm:publish": "tsup --outDir npm/dist && cd npm && npm publish",
-		"clean": "rimraf dist npm/dist .turbo"
+		"clean": "rimraf dist npm/dist .turbo",
+		"sec:allow-scripts": "npx @lavamoat/allow-scripts auto"
 	},
 	"dependencies": {
 		"zod": "^3.25.61"

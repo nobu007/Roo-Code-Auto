@@ -22,7 +22,8 @@
 		"db:stop": "docker compose down db",
 		"redis:start": "docker compose up -d redis",
 		"redis:stop": "docker compose down redis",
-		"services:start": "docker compose up -d db redis"
+		"services:start": "docker compose up -d db redis",
+		"sec:allow-scripts": "npx @lavamoat/allow-scripts auto"
 	},
 	"dependencies": {
 		"@roo-code/ipc": "workspace:^",

@@ -36,5 +36,8 @@
 	},
 	"files": [
 		"dist"
-	]
+	],
+	"scripts": {
+		"sec:allow-scripts": "npx @lavamoat/allow-scripts auto"
+	}
 }

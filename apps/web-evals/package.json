@@ -9,7 +9,8 @@
 		"format": "prettier --write src",
 		"build": "next build",
 		"start": "next start",
-		"clean": "rimraf .next .turbo"
+		"clean": "rimraf .next .turbo",
+		"sec:allow-scripts": "npx @lavamoat/allow-scripts auto"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^5.1.1",

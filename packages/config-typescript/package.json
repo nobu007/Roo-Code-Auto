@@ -3,5 +3,8 @@
 	"private": true,
 	"publishConfig": {
 		"access": "public"
+	},
+	"scripts": {
+		"sec:allow-scripts": "npx @lavamoat/allow-scripts auto"
 	}
 }

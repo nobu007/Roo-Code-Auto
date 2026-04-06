@@ -10,7 +10,8 @@
 		"check-types": "tsc --noEmit",
 		"test": "vitest run",
 		"build": "tsc",
-		"clean": "rimraf dist .turbo"
+		"clean": "rimraf dist .turbo",
+		"sec:allow-scripts": "npx @lavamoat/allow-scripts auto"
 	},
 	"dependencies": {
 		"zod": "^3.25.61"

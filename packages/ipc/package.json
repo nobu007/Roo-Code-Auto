@@ -11,13 +11,17 @@
 	},
 	"dependencies": {
 		"@roo-code/types": "workspace:^",
-		"node-ipc": "^12.0.0"
+		"node-ipc": "^12.0.0",
+		"redis": "^4.6.13",
+		"eventsource": "^2.0.2",
+		"axios": "^1.6.8"
 	},
 	"devDependencies": {
 		"@roo-code/config-eslint": "workspace:^",
 		"@roo-code/config-typescript": "workspace:^",
 		"@types/node": "20.x",
 		"@types/node-ipc": "^9.2.3",
+		"@types/eventsource": "^1.1.15",
 		"vitest": "^3.2.3"
 	}
 }

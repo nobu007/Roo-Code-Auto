@@ -8,7 +8,8 @@
 		"lint": "eslint src --ext=ts --max-warnings=0",
 		"check-types": "tsc --noEmit",
 		"test": "vitest run",
-		"clean": "rimraf dist .turbo"
+		"clean": "rimraf dist .turbo",
+		"sec:allow-scripts": "npx @lavamoat/allow-scripts auto"
 	},
 	"dependencies": {
 		"@roo-code/types": "workspace:^",
