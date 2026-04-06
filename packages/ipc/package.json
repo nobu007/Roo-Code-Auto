@@ -7,7 +7,8 @@
 	"scripts": {
 		"lint": "eslint src --ext=ts --max-warnings=0",
 		"check-types": "tsc --noEmit",
-		"clean": "rimraf .turbo"
+		"clean": "rimraf .turbo",
+		"sec:allow-scripts": "npx @lavamoat/allow-scripts auto"
 	},
 	"dependencies": {
 		"@roo-code/types": "workspace:^",
