@@ -16,6 +16,9 @@ import { CodeIndexManager } from "../services/code-index/manager"
 import { importSettingsWithFeedback } from "../core/config/importExport"
 import { t } from "../i18n"
 
+// Import GitHub LM test functions
+import { testActualGitHubLM, testMultipleGitHubModels, testWithRooCodeConfig } from "../utils/github-lm-test"
+
 /**
  * Helper to get the visible ClineProvider instance or log if not found.
  */
@@ -216,6 +219,82 @@ const getCommandsMap = ({ context, outputChannel, provider }: RegisterCommandOpt
 		}
 
 		visibleProvider.postMessageToWebview({ type: "acceptInput" })
+	},
+	testGitHubLM: async () => {
+		const outputChannel = vscode.window.createOutputChannel("GitHub LM Test")
+		outputChannel.show()
+
+		// コンソール出力をOutputChannelにリダイレクト
+		const originalLog = console.log
+		const originalError = console.error
+		console.log = (...args) => {
+			outputChannel.appendLine(args.join(" "))
+			originalLog(...args)
+		}
+		console.error = (...args) => {
+			outputChannel.appendLine(`ERROR: ${args.join(" ")}`)
+			originalError(...args)
+		}
+
+		try {
+			outputChannel.appendLine("Starting GitHub LM test...")
+			await testActualGitHubLM()
+		} catch (error) {
+			outputChannel.appendLine(`Test failed: ${error}`)
+		} finally {
+			console.log = originalLog
+			console.error = originalError
+		}
+	},
+	testMultipleGitHubModels: async () => {
+		const outputChannel = vscode.window.createOutputChannel("GitHub LM Multi Test")
+		outputChannel.show()
+
+		const originalLog = console.log
+		const originalError = console.error
+		console.log = (...args) => {
+			outputChannel.appendLine(args.join(" "))
+			originalLog(...args)
+		}
+		console.error = (...args) => {
+			outputChannel.appendLine(`ERROR: ${args.join(" ")}`)
+			originalError(...args)
+		}
+
+		try {
+			outputChannel.appendLine("Starting multiple GitHub models test...")
+			await testMultipleGitHubModels()
+		} catch (error) {
+			outputChannel.appendLine(`Test failed: ${error}`)
+		} finally {
+			console.log = originalLog
+			console.error = originalError
+		}
+	},
+	testRooCodeGitHubConfig: async () => {
+		const outputChannel = vscode.window.createOutputChannel("GitHub LM Config Test")
+		outputChannel.show()
+
+		const originalLog = console.log
+		const originalError = console.error
+		console.log = (...args) => {
+			outputChannel.appendLine(args.join(" "))
+			originalLog(...args)
+		}
+		console.error = (...args) => {
+			outputChannel.appendLine(`ERROR: ${args.join(" ")}`)
+			originalError(...args)
+		}
+
+		try {
+			outputChannel.appendLine("Starting Roo Code GitHub configuration test...")
+			await testWithRooCodeConfig()
+		} catch (error) {
+			outputChannel.appendLine(`Test failed: ${error}`)
+		} finally {
+			console.log = originalLog
+			console.error = originalError
+		}
 	},
 })
 

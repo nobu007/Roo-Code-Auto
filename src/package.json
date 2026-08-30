@@ -169,6 +169,21 @@
 				"command": "roo-cline.acceptInput",
 				"title": "%command.acceptInput.title%",
 				"category": "%configuration.title%"
+			},
+			{
+				"command": "roo-cline.testGitHubLM",
+				"title": "Test GitHub LM",
+				"category": "Developer"
+			},
+			{
+				"command": "roo-cline.testMultipleGitHubModels",
+				"title": "Test Multiple GitHub Models",
+				"category": "Developer"
+			},
+			{
+				"command": "roo-cline.testRooCodeGitHubConfig",
+				"title": "Test Roo Code GitHub Configuration",
+				"category": "Developer"
 			}
 		],
 		"menus": {

@@ -53,6 +53,10 @@ export const commandIds = [
 	"focusInput",
 	"acceptInput",
 	"focusPanel",
+
+	"testGitHubLM",
+	"testMultipleGitHubModels",
+	"testRooCodeGitHubConfig",
 ] as const
 
 export type CommandId = (typeof commandIds)[number]

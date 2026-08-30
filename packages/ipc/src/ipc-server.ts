@@ -11,12 +11,18 @@ import {
 	IpcMessageType,
 	type IpcMessage,
 	ipcMessageSchema,
+	type ProviderSettings,
+	providerSettingsSchema,
+	providerNames,
+	type TaskCommand,
+	TaskCommandName,
 } from "@roo-code/types"
 
 export class IpcServer extends EventEmitter<IpcServerEvents> implements RooCodeIpcServer {
 	private readonly _socketPath: string
 	private readonly _log: (...args: unknown[]) => void
 	private readonly _clients: Map<string, Socket>
+	private _providerSettings: ProviderSettings | null = null
 
 	private _isListening = false
 
@@ -92,12 +98,47 @@ export class IpcServer extends EventEmitter<IpcServerEvents> implements RooCodeI
 		if (payload.origin === IpcOrigin.Client) {
 			switch (payload.type) {
 				case IpcMessageType.TaskCommand:
-					this.emit(IpcMessageType.TaskCommand, payload.clientId, payload.data)
+					this.handleTaskCommand(payload.clientId, payload.data)
 					break
 				default:
 					this.log(`[server#onMessage] unhandled payload: ${JSON.stringify(payload)}`)
 					break
 			}
+		}
+	}
+
+	private handleTaskCommand(clientId: string, data: TaskCommand) {
+		switch (data.commandName) {
+			case TaskCommandName.SetProviderSettings:
+				try {
+					this.setProviderSettings(data.data)
+					this.send(clientId, {
+						type: IpcMessageType.ProviderSettingsResponse,
+						origin: IpcOrigin.Server,
+						data: { success: true },
+					})
+				} catch (error) {
+					this.log(`[server#handleTaskCommand] SetProviderSettings error:`, error)
+					this.send(clientId, {
+						type: IpcMessageType.ProviderSettingsResponse,
+						origin: IpcOrigin.Server,
+						data: { success: false, error: String(error) },
+					})
+				}
+				break
+			case TaskCommandName.GetProviderSettings: {
+				const settings = this.getProviderSettings()
+				this.send(clientId, {
+					type: IpcMessageType.ProviderSettingsResponse,
+					origin: IpcOrigin.Server,
+					data: { success: true, settings: settings || undefined },
+				})
+				break
+			}
+			default:
+				// 他のコマンドは既存のイベントエミッターに委譲
+				this.emit(IpcMessageType.TaskCommand, clientId, data)
+				break
 		}
 	}
 
@@ -130,5 +171,59 @@ export class IpcServer extends EventEmitter<IpcServerEvents> implements RooCodeI
 
 	public get isListening() {
 		return this._isListening
+	}
+
+	/**
+	 * VSCode LM プロバイダー設定を設定する
+	 */
+	public setProviderSettings(settings: ProviderSettings) {
+		const validationResult = providerSettingsSchema.safeParse(settings)
+
+		if (!validationResult.success) {
+			this.log("[server#setProviderSettings] Invalid provider settings:", validationResult.error.format())
+			throw new Error("Invalid provider settings")
+		}
+
+		this._providerSettings = validationResult.data
+		this.log("[server#setProviderSettings] Provider settings updated successfully")
+	}
+
+	/**
+	 * 現在のプロバイダー設定を取得する
+	 */
+	public getProviderSettings(): ProviderSettings | null {
+		return this._providerSettings
+	}
+
+	/**
+	 * VSCode LM プロバイダーが設定されているかチェックする
+	 */
+	public isVsCodeLmConfigured(): boolean {
+		return this._providerSettings?.apiProvider === "vscode-lm"
+	}
+
+	/**
+	 * VSCode LM のモデルセレクターを取得する
+	 */
+	public getVsCodeLmModelSelector() {
+		if (!this.isVsCodeLmConfigured()) {
+			return null
+		}
+
+		return this._providerSettings?.vsCodeLmModelSelector || null
+	}
+
+	/**
+	 * 利用可能なプロバイダー名の一覧を取得する
+	 */
+	public getAvailableProviders(): readonly string[] {
+		return providerNames
+	}
+
+	/**
+	 * 指定されたプロバイダーが利用可能かチェックする
+	 */
+	public isProviderAvailable(providerName: string): boolean {
+		return (providerNames as readonly string[]).includes(providerName)
 	}
 }

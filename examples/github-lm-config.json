@@ -1,0 +1,52 @@
+{
+	"_description": "GitHub LM (Copilot) を使用するためのRoo Code設定例",
+	"_instructions": [
+		"1. GitHub Copilot拡張機能をVSCodeにインストール",
+		"2. GitHub Copilotにログイン（有効なサブスクリプション必要）",
+		"3. この設定をRoo Codeにインポート",
+		"4. プロバイダーとして 'VS Code LM API' を選択",
+		"5. モデルとして copilot モデルを選択"
+	],
+
+	"apiProvider": "vscode-lm",
+
+	"vsCodeLmModelSelector": {
+		"vendor": "copilot",
+		"family": "gpt-4o"
+	},
+
+	"modelTemperature": 0.7,
+	"includeMaxTokens": true,
+	"diffEnabled": true,
+	"enableReasoningEffort": false,
+
+	"_alternativeSelectors": {
+		"_note": "使用可能なcopilotモデルの例（実際のモデル名は環境により異なる）",
+		"option1": {
+			"vendor": "copilot",
+			"family": "gpt-4o"
+		},
+		"option2": {
+			"vendor": "copilot",
+			"family": "gpt-4"
+		},
+		"option3": {
+			"vendor": "github",
+			"family": "copilot"
+		}
+	},
+
+	"_troubleshooting": {
+		"no_models_found": [
+			"GitHub Copilot拡張機能がインストールされていない",
+			"GitHub Copilotにログインしていない",
+			"GitHub Copilotサブスクリプションが無効",
+			"VSCode LM APIへのアクセス権限がない"
+		],
+		"authentication_error": [
+			"VSCodeでGitHub Copilotからログアウトして再ログイン",
+			"GitHub Copilotサブスクリプションのステータス確認",
+			"VSCodeの再起動"
+		]
+	}
+}

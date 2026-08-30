@@ -3,6 +3,7 @@ import { z } from "zod"
 import { clineMessageSchema, tokenUsageSchema } from "./message.js"
 import { toolNamesSchema, toolUsageSchema } from "./tool.js"
 import { rooCodeSettingsSchema } from "./global-settings.js"
+import { providerSettingsSchema, type ProviderSettings } from "./provider-settings.js"
 
 /**
  * isSubtaskSchema
@@ -76,6 +77,8 @@ export enum TaskCommandName {
 	StartNewTask = "StartNewTask",
 	CancelTask = "CancelTask",
 	CloseTask = "CloseTask",
+	SetProviderSettings = "SetProviderSettings",
+	GetProviderSettings = "GetProviderSettings",
 }
 
 export const taskCommandSchema = z.discriminatedUnion("commandName", [
@@ -95,6 +98,14 @@ export const taskCommandSchema = z.discriminatedUnion("commandName", [
 	z.object({
 		commandName: z.literal(TaskCommandName.CloseTask),
 		data: z.string(),
+	}),
+	z.object({
+		commandName: z.literal(TaskCommandName.SetProviderSettings),
+		data: providerSettingsSchema,
+	}),
+	z.object({
+		commandName: z.literal(TaskCommandName.GetProviderSettings),
+		data: z.object({}),
 	}),
 ])
 
@@ -189,6 +200,7 @@ export enum IpcMessageType {
 	Ack = "Ack",
 	TaskCommand = "TaskCommand",
 	TaskEvent = "TaskEvent",
+	ProviderSettingsResponse = "ProviderSettingsResponse",
 }
 
 export enum IpcOrigin {
@@ -214,6 +226,15 @@ export const ipcMessageSchema = z.discriminatedUnion("type", [
 		relayClientId: z.string().optional(),
 		data: taskEventSchema,
 	}),
+	z.object({
+		type: z.literal(IpcMessageType.ProviderSettingsResponse),
+		origin: z.literal(IpcOrigin.Server),
+		data: z.object({
+			success: z.boolean(),
+			settings: providerSettingsSchema.optional(),
+			error: z.string().optional(),
+		}),
+	}),
 ])
 
 export type IpcMessage = z.infer<typeof ipcMessageSchema>
@@ -228,6 +249,7 @@ export type IpcClientEvents = {
 	[IpcMessageType.Ack]: [data: Ack]
 	[IpcMessageType.TaskCommand]: [data: TaskCommand]
 	[IpcMessageType.TaskEvent]: [data: TaskEvent]
+	[IpcMessageType.ProviderSettingsResponse]: [data: { success: boolean; settings?: ProviderSettings; error?: string }]
 }
 
 /**
@@ -239,4 +261,5 @@ export type IpcServerEvents = {
 	[IpcMessageType.Disconnect]: [clientId: string]
 	[IpcMessageType.TaskCommand]: [clientId: string, data: TaskCommand]
 	[IpcMessageType.TaskEvent]: [relayClientId: string | undefined, data: TaskEvent]
+	[IpcMessageType.ProviderSettingsResponse]: [data: { success: boolean; settings?: ProviderSettings; error?: string }]
 }
