@@ -4,8 +4,8 @@ Repository: Roo-Code-Auto
 
 ## 階層関係（エスカレーション経路）
 
-- 親: business_operation_notes（推定・jinno確定待ち）
-- 根拠: 上流 OSS「Roo Code」（RooCodeInc/Roo-Code）のフォーク/自動化カスタムであり、開発ツール扱いとする。
-- 出典: README.md（上流 Roo Code のバッジ・紹介文を含む）、原則 llm-wiki-discipline の drafts-are-status-marked（状態表示付き草案）。
+- 親: business_operation_notes（jinno確定 2026-09-26）
+- 根拠: 上流 RooVetGit/Roo-Code の fork。上流比 6 コミット先行し GitHub LM テストハーネス新設（IPC 登録）・docker-compose IPC socket・zero-trust ポリシーを追加。全リポ共通の開発自動化ツールのため business_operation_notes 配下（出典: git log up/main..main、fork 調査 2026-09-26）
+- 出典: contracts registry `registry/organization/repositories/roo-code-auto.yaml` の spec.parent（contracts commit ecbc226）。2026-09-26 の一括レビュー表 output/repo-parent-review-2026-09-26.md（ローカル output ディレクトリ）を jinno が現状案で承認。
 
-- Observation: 上記の親は推定草案であり、jinno確定後に contracts registry の spec.parent へ反映される。上流フォークであるため確信度は低い。provider/consumer の検証済み関係はまだない。
+- Observation: 以前の推定草案（jinno確定待ち）は 2026-09-26 の一括レビューで現状案のまま確定された。provider/consumer の検証済み関係はまだない。
