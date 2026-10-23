@@ -46,3 +46,6 @@ logs
 # auto-added by instructions/10_storage/100_audit_storage_policy.md
 .audit/development_direction.yml
 
+# Local docker eval-stack runtime data (owned by container user, never tracked)
+packages/evals/.docker/
+
