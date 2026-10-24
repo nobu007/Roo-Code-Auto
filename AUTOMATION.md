@@ -2,6 +2,11 @@
 
 大ゴール: AIによる全自動開発の実現。人間より圧倒的に効率的に。(fleet共通)
 
+このリポジトリが担う開発方針と現在の作業波:
+- [長期方針](docs/LONG_TERM_DIRECTION.md)
+- [マイルストーン](docs/MILESTONES.md)
+- [Dot 専任ワーカー指示書](docs/DOT_WORKER_INSTRUCTIONS.md)
+
 ## 発火 (Driver)
 - crontab: 0本(2026-09-15 実測・全41行との突合)
 - GitHub Actions: 10本
