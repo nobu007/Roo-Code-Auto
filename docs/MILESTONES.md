@@ -21,8 +21,8 @@ Outcome: このリポジトリのテスト基盤（`npm test` = turbo test）の
 Acceptance: `npm test` を実行し、結果（exit code・passed/failed 件数の要約）を本項目の Evidence に日付つきで記録する。全緑なら baseline-green、失敗があれば失敗テスト名を MS-002 配下の追記として列挙する。
 Evidence: pending
 Status: planned
-依存: MS-001。
-次: 約30分の具体的作業として、`npm test` を実行して結果を Evidence へ記録。失敗がある場合は LOOP.md 候補順に従い次回以降の run で 1 件ずつ修正する。
+依存: MS-001。前提条件（ORDER.md 第8節・2026-10-24 run-4a4372aa1364 の記録）: 依存導入まで `turbo: not found` で `npm test` は起動不能。また未追跡ツール状態が残る worktree では before-work 記録が拒否される（`repository_changed_before_definition`）。
+次: 約30分の具体的作業として、依存導入後に `npm test` を実行して結果を Evidence へ記録。起動不能・失敗のままの場合は阻害内容を Evidence に記録して終了する。失敗がある場合は LOOP.md 候補順に従い次回以降の run で 1 件ずつ修正する。
 
 ## MS-003: upstream（RooCodeInc/Roo-Code）との分岐状況の把握
 

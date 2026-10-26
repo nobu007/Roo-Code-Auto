@@ -27,6 +27,8 @@
   漂流していた dirty tree を収束（`680d432ca`: AGENTS/PURPOSE シード commit、`b07d1a2fe`: evals runtime ignore）。
 - 作業ツリーはほぼクリーン（`.husky/_/` は husky prepare の生成物・未追跡のランタイムデータで、管理対象外）。
 - 自律ループの実行規約（LOOP.md）と運用シード（AGENTS.md）は配置済み。
+- 2026-10-24 の bounded-improvement run（`run-4a4372aa1364`）は before-work 記録の直前で失敗し、
+  変更ゼロで終了した（詳細は第8節 停止時評価）。
 
 ## 3. 現状との差（ギャップ）
 
@@ -34,6 +36,9 @@
 2. **テスト基盤の健全性が未検証** — `npm test`（turbo 経由）の通過状況をこのリポ内に記録した証拠がない（MS-002）。
 3. **upstream との分岐状況が未把握** — フォークとして追従可否の判断材料がない（MS-003）。
 4. **検証済み知識の定置がない** — `docs/llm-wiki/` が未整備で、run 間の知識が失われる（MS-004）。
+5. **自律ループ実行の環境前提が未整備** — 依存が未導入のため第1候補の `npm test` が
+   `turbo: not found` で起動できない。また、未追跡ツール状態が残る worktree では
+   before-work 記録が拒否される（第8節、MS-002 の前提条件）。
 
 ## 4. 優先順
 
@@ -64,5 +69,29 @@
 実行結果を `docs/MILESTONES.md` MS-002 の Evidence に記録し、以後の run が
 ベースラインを参照できるようにする。次点は MS-003。
 
+前提条件（第8節）: 依存導入済みで `turbo` が実行可能なこと、および before-work 記録が
+拒否されない worktree 状態であること。未達の場合は阻害内容を Evidence に記録して終了する。
+
+## 8. 停止時評価（2026-10-26・OI-20261026-55）
+
+制御平面の観測では最終実行 `run-4a4372aa1364`（mode: bounded-improvement）が
+`failed`・reason `unknown` と記録された。モード名だけで断定せず、運用記録から確認した結果:
+
+- **停止事実（証拠）**: 当該 run は ai-hub run `20261024-183629-955830`（2026-10-24 18:36 UTC）
+  として実行された。`meta.json` の `task_definition.state` は `task_definition_unavailable`、
+  コミット数 0・差分 0。exit code は 0 だがタスクとしては未完了扱いで失敗と判定された。
+- **停止原因（記録から特定）**: ① before-work 記録処理が `repository_changed_before_definition`
+  で拒否（未追跡の `.husky/_/`・`.serena/` が作業ツリーに残存。エージェントは規約どおり
+  削除せず停止）② 調査の結果、`npm test` は `turbo: not found` で起動不能（`turbo` は
+  devDependencies `^2.5.3` に存在するが依存導入が未実施）。制御平面の reason `unknown` は
+  上記2点の複合と判断する。不明点: 制御平面が `failed` と判定した正確な判定経緯。
+- **長期目的との差**: 計画自体の欠陥ではなく、MS-002 実行の環境前提（依存導入・
+  記録可能な worktree 状態）が未充足であることが差の本体。
+- **計画判断**: **維持する**。目的・優先順・出口条件は現状の証拠と矛盾しない。
+  改訂は行わず、MS-002 の次の作業に前提条件を追記する（本評価と同一変更）。
+- **未解決の依存・再開条件**: (a) 依存導入（`pnpm install` 相当）により `turbo` が実行可能、
+  (b) before-work 記録が拒否されない worktree 状態、の2点が揃ったとき MS-002 から再開する。
+  停止解除・mode 変更・実装再開の可否は本計画の範囲外（owner 判断事項）。
+
 ---
-Last updated: 2026-10-25 (OI-20261025-13)
+Last updated: 2026-10-26 (OI-20261026-55)

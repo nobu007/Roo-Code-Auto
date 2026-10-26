@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
   "long_term": {
-    "summary": "Roo-Code フォークを有界自律ケアで健全に維持する: 計画基盤整備、npm test ベースライン把握、upstream 分岐把握、知識定置を段階的に達成し、LOOP.md の自律改善ループが継続可能な状態を保つ。",
+    "summary": "Roo-Code フォークを有界自律ケアで健全に維持する: 計画基盤整備、npm test ベースライン把握、upstream 分岐把握、知識定置を段階的に達成し、LOOP.md の自律改善ループが継続可能な状態を保つ。2026-10-26 停止時評価により計画は維持（ORDER.md 第8節）。",
     "source": "ORDER.md",
-    "source_hash": "git-blob:f472cc9d60a314d8d253b926dd21f064d44a3488",
-    "updated_at": "2026-10-25"
+    "source_hash": "git-blob:a8babbb52ca0c8b6764ed35c4d755c5deda6cbab",
+    "updated_at": "2026-10-26"
   },
   "short_term": {
-    "summary": "MS-002: npm test（turbo test）ベースラインを検証し、結果を docs/MILESTONES.md の Evidence に日付つきで記録する（約30分）。",
+    "summary": "MS-002: 依存導入後に npm test（turbo test）ベースラインを検証し、結果を docs/MILESTONES.md の Evidence に日付つきで記録する（約30分。前提条件は ORDER.md 第8節）。",
     "source": "docs/MILESTONES.md#MS-002",
-    "source_hash": "git-blob:9b7e0367ffb85b6205c0e36c83c283b6003593e9",
-    "updated_at": "2026-10-25",
+    "source_hash": "git-blob:1a26314966b1f151235a1cc10bc50f3911b62a85",
+    "updated_at": "2026-10-26",
     "status": "not_started"
   },
-  "verified_at": "2026-10-24T23:12:30Z"
+  "verified_at": "2026-10-26T13:20:00Z"
 }
