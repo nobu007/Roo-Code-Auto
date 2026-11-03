@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "long_term": {
+    "summary": "Roo-Code の有界自律ケアを継続可能にするため、計画基盤を整え、テスト基準・upstream差分・検証済み知識の順に受入証拠を揃える。",
+    "source": "ORDER.md",
+    "source_hash": "git-blob:a8babbb52ca0c8b6764ed35c4d755c5deda6cbab",
+    "updated_at": "2026-10-26"
+  },
+  "short_term": {
+    "summary": "MS-002: 依存導入後に npm test のベースラインを検証し、終了コードと件数を docs/MILESTONES.md に日付つきで記録する。約30分。前提条件は ORDER.md 第8節。",
+    "source": "docs/MILESTONES.md#MS-002",
+    "source_hash": "git-blob:1a26314966b1f151235a1cc10bc50f3911b62a85",
+    "updated_at": "2026-10-26",
+    "status": "not_started"
+  },
+  "verified_at": "2026-11-03T04:52:19Z"
+}

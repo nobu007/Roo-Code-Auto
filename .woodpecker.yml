@@ -1,0 +1,11 @@
+when:
+  event: [pull_request, push]
+
+labels:
+  platform: linux/amd64
+
+steps:
+  - name: validate-repository-metadata
+    image: python:3.12.8-slim
+    commands:
+      - python3 scripts/validate_repo_metadata.py
