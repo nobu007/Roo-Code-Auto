@@ -14,7 +14,7 @@ env:
 
 jobs:
     check-secrets:
-        runs-on: ubuntu-latest
+        runs-on: [self-hosted, linux, x64]
         outputs:
             has-vercel-token: ${{ steps.check.outputs.has-vercel-token }}
         steps:
@@ -28,7 +28,7 @@ jobs:
                 fi
 
     deploy:
-        runs-on: ubuntu-latest
+        runs-on: [self-hosted, linux, x64]
         needs: check-secrets
         if: ${{ needs.check-secrets.outputs.has-vercel-token == 'true' }}
         steps:

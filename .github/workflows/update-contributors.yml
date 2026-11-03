@@ -8,7 +8,7 @@ on:
 
 jobs:
   update-contributors:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
     permissions:
       contents: write  # Needed for pushing changes.
       pull-requests: write  # Needed for creating PRs.

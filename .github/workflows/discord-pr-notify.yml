@@ -7,7 +7,7 @@ on:
 
 jobs:
   notify:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64]
     if: github.head_ref != 'changeset-release/main'
     steps:
       - name: Send Discord Notification
