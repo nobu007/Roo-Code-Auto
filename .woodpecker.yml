@@ -1,5 +1,7 @@
 when:
-  event: [pull_request, push]
+  - event: push
+    branch: main
+  - event: [pull_request, manual]
 
 labels:
   platform: linux/amd64
